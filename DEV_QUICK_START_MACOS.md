@@ -25,7 +25,15 @@ https://brew.sh/
 #### Install Minishift (local install of OpenShift)
 `brew cask install minishift`
 
-At the moment of this writing you will need to fix xhyve driver for Minishift to work:
+#### Install VM support
+
+There are two options for virtualisation - Xhyve, and Hyperkit
+
+##### Install Xhyve support
+
+Xhyve is the popular driver, but has been deprecated by minikube project.
+
+At the moment of this writing you will need to hack xhyve driver installation for Minishift to work:
 https://stackoverflow.com/questions/56358247/error-creating-new-host-json-cannot-unmarshal-bool-into-go-struct-field-driver
 ```
 brew uninstall docker-machine-driver-xhyve
@@ -39,6 +47,15 @@ Change tag and revision:
 brew install docker-machine-driver-xhyve
 sudo chown root:wheel $(brew --prefix)/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
 sudo chmod u+s $(brew --prefix)/opt/docker-machine-driver-xhyve/bin/docker-machine-driver-xhyve
+```
+
+##### Alternatively - Install Hyperkit support
+
+```
+brew install hyperkit
+brew install docker-machine-driver-hyperkit
+sudo chown root:wheel $(brew --prefix)/opt/docker-machine-driver-hyperkit/bin/docker-machine-driver-hyperkit
+sudo chmod u+s $(brew --prefix)/opt/docker-machine-driver-hyperkit/bin/docker-machine-driver-hyperkit
 ```
 
 #### Install latest Bash
@@ -61,9 +78,14 @@ You need a running Kubernetes / Minishift in order to initialize Helm. So the fo
 ## Preparing Minishift
 
 #### Start Minishift
-`minishift start --memory=4096 --cpus=4`
 
-Once minishift has been started the memory and cpu settings become part of the persistent configuration, and subsequent invocations of `minishift start` will ignore `--memory` and `--cpus` arguments. In order to change them later you have to edit the VM configuration file located at: `$HOME/.minishift/machines/minishift/config.json`
+Using Xhyve:
+`minishift start --vm-driver=xhyve --memory=4096 --cpus=4`
+
+Or using Hyperkit:
+`minishift start --vm-driver=hyperkit --memory=4096 --cpus=4`
+
+Once minishift has been started the vm-driver, memory and cpu settings become part of the persistent configuration, and subsequent invocations of `minishift start` will ignore `--vm-driver`, `--memory` and `--cpus` arguments. In order to change them later you have to edit the VM configuration file located at: `$HOME/.minishift/machines/minishift/config.json`
 
 Another option is to simply delete the existing instance (`minishift delete`), but in that case you discard the whole VM including the disk volumes.
 
