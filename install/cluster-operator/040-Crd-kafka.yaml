@@ -232,19 +232,8 @@ spec:
                                 can be used for local JWT validation.
                             jwksExpirySeconds:
                               type: integer
-                              minimum: 1
-                              description: Configures how often are the JWKS certificates
-                                considered valid. The expiry interval has to be at
-                                least 60 seconds longer then the refresh interval
-                                specified in `jwksRefreshSeconds`. Defaults to 360
-                                seconds.
                             jwksRefreshSeconds:
                               type: integer
-                              minimum: 1
-                              description: Configures how often are the JWKS certificates
-                                refreshed. The refresh interval has to be at least
-                                60 seconds shorter then the expiry interval specified
-                                in `jwksExpirySeconds`. Defaults to 300 seconds.
                             tlsTrustedCertificates:
                               type: array
                               items:
@@ -404,19 +393,8 @@ spec:
                                 can be used for local JWT validation.
                             jwksExpirySeconds:
                               type: integer
-                              minimum: 1
-                              description: Configures how often are the JWKS certificates
-                                considered valid. The expiry interval has to be at
-                                least 60 seconds longer then the refresh interval
-                                specified in `jwksRefreshSeconds`. Defaults to 360
-                                seconds.
                             jwksRefreshSeconds:
                               type: integer
-                              minimum: 1
-                              description: Configures how often are the JWKS certificates
-                                refreshed. The refresh interval has to be at least
-                                60 seconds shorter then the expiry interval specified
-                                in `jwksExpirySeconds`. Defaults to 300 seconds.
                             tlsTrustedCertificates:
                               type: array
                               items:
@@ -600,19 +578,8 @@ spec:
                                 can be used for local JWT validation.
                             jwksExpirySeconds:
                               type: integer
-                              minimum: 1
-                              description: Configures how often are the JWKS certificates
-                                considered valid. The expiry interval has to be at
-                                least 60 seconds longer then the refresh interval
-                                specified in `jwksRefreshSeconds`. Defaults to 360
-                                seconds.
                             jwksRefreshSeconds:
                               type: integer
-                              minimum: 1
-                              description: Configures how often are the JWKS certificates
-                                refreshed. The refresh interval has to be at least
-                                60 seconds shorter then the expiry interval specified
-                                in `jwksExpirySeconds`. Defaults to 300 seconds.
                             tlsTrustedCertificates:
                               type: array
                               items:

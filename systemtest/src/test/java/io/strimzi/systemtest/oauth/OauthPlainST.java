@@ -355,29 +355,26 @@ public class OauthPlainST extends OauthBaseST {
     void testIntrospectionEndpointWithPlainCommunication() throws IOException, InterruptedException, ExecutionException, TimeoutException {
         LOGGER.info("Deploying kafka...");
 
-        String introspectionKafka = CLUSTER_NAME + "-intro";
+        String introspectionKafka = CLUSTER_NAME + "intro";
 
         KafkaResource.kafkaEphemeral(introspectionKafka, 1)
-            .editSpec()
+                .editSpec()
                 .editKafka()
-                    .editListeners()
-                        .withNewKafkaListenerExternalNodePort()
-                            .withNewKafkaListenerAuthenticationOAuth()
-                                .withClientId(OAUTH_KAFKA_CLIENT_NAME)
-                                .withNewClientSecret()
-                                    .withSecretName(OAUTH_KAFKA_CLIENT_SECRET)
-                                    .withKey(OAUTH_KEY)
-                                .endClientSecret()
-                                .withAccessTokenIsJwt(false)
-                                .withValidIssuerUri(validIssuerUri)
-                                .withIntrospectionEndpointUri(introspectionEndpointUri)
-                            .endKafkaListenerAuthenticationOAuth()
-                            .withTls(false)
-                        .endKafkaListenerExternalNodePort()
-                    .endListeners()
+                .editListeners()
+                .withNewKafkaListenerExternalNodePort()
+                .withNewKafkaListenerAuthenticationOAuth()
+                .withClientId(OAUTH_KAFKA_CLIENT_NAME)
+                .withNewClientSecret()
+                .withSecretName(OAUTH_KAFKA_CLIENT_SECRET)
+                .withKey(OAUTH_KEY)
+                .endClientSecret()
+                .withAccessTokenIsJwt(false)
+                .endKafkaListenerAuthenticationOAuth()
+                .endKafkaListenerExternalNodePort()
+                .endListeners()
                 .endKafka()
-            .endSpec()
-            .done();
+                .endSpec()
+                .done();
 
         Future<Integer> producer = oauthKafkaClient.sendMessages(TOPIC_NAME, NAMESPACE, introspectionKafka, MESSAGE_COUNT);
         Future<Integer> consumer = oauthKafkaClient.receiveMessages(TOPIC_NAME, NAMESPACE, introspectionKafka, MESSAGE_COUNT,
