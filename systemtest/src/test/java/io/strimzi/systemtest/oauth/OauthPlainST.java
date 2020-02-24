@@ -357,6 +357,8 @@ public class OauthPlainST extends OauthBaseST {
 
         String introspectionKafka = CLUSTER_NAME + "intro";
 
+        String introspectionEndpointUri = "http://" + keycloakIpWithPortHttp + "/auth/realms/internal/protocol/openid-connect/token/introspect";
+
         KafkaResource.kafkaEphemeral(introspectionKafka, 1)
                 .editSpec()
                 .editKafka()
@@ -369,6 +371,8 @@ public class OauthPlainST extends OauthBaseST {
                 .withKey(OAUTH_KEY)
                 .endClientSecret()
                 .withAccessTokenIsJwt(false)
+                .withValidIssuerUri(validIssuerUri)
+                .withIntrospectionEndpointUri(introspectionEndpointUri)
                 .endKafkaListenerAuthenticationOAuth()
                 .endKafkaListenerExternalNodePort()
                 .endListeners()
