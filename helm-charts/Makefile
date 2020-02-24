@@ -36,14 +36,14 @@ helm_install: helm_clean helm_template
 	# Copying rendered template files to: $(CHART_RENDERED_TEMPLATES_INSTALL)
 	mkdir -p $(CHART_RENDERED_TEMPLATES_INSTALL)
 	# Find rendered resources which are not CustomResourceDefinition and move them
-	$(FIND) $(CHART_RENDERED_TEMPLATES_TMP) -type f -name '*.yaml' -printf "%p " -exec yq r {} kind \; \
+	$(FIND) $(CHART_RENDERED_TEMPLATES_TMP) -type f -name '*.yaml' -exec sh -c 'echo $1 $(yq r $1 kind)' _ {} \; \
 	| grep -v 'CustomResourceDefinition$$' \
 	| $(SED) -E 's/([^ ]*) ([a-zA-Z0-9]*)$$/\1/' \
 	| xargs -IFILE $(CP) FILE $(CHART_RENDERED_TEMPLATES_INSTALL)
 	# Copying rendered template files to: $(CHART_RENDERED_TEMPLATES_CLUSTERROLES)
 	mkdir -p $(CHART_RENDERED_TEMPLATES_CLUSTERROLES)
 	# Find rendered resources which are not CustomResourceDefinition and move them
-	$(FIND) $(CHART_RENDERED_TEMPLATES_TMP) -type f -name '*ClusterRole-*.yaml' -printf "%p " -exec yq r {} kind \; \
+	$(FIND) $(CHART_RENDERED_TEMPLATES_TMP) -type f -name '*ClusterRole-*.yaml' -exec sh -c 'echo $1 $(yq r $1 kind)' _ {} \; \
 	| $(SED) -E 's/([^ ]*) ([a-zA-Z0-9]*)$$/\1/' \
 	| xargs -IFILE $(CP) FILE $(CHART_RENDERED_TEMPLATES_CLUSTERROLES)
 

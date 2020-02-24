@@ -42,43 +42,58 @@ function get_default_kafka_version {
 }
 
 function get_kafka_versions {
-    eval versions="$(yq read $VERSIONS_FILE '*.version' -j | tr '[],' '() ')"
+    local val="$(yq read $VERSIONS_FILE '*.version' -j | tr '[],' '() ')"
+    val=$(sed -e 's/^"//' -e 's/"$//' <<<"$val")
+    IFS=$'\n' versions=($val)
 }
 
 function get_kafka_urls {
-    eval binary_urls="$(yq read $VERSIONS_FILE '*.url' -j | tr '[],' '() ')"
+    local val="$(yq read $VERSIONS_FILE '*.url' -j | tr '[],' '() ')"
+    val=$(sed -e 's/^"//' -e 's/"$//' <<<"$val")
+    IFS=$'\n' binary_urls=($val)
 }
 
 function get_zookeeper_versions {
-
-    eval zk_versions="$(yq read $VERSIONS_FILE '*.zookeeper' -j | tr '[],' '() ')"
-
+    local val="$(yq read $VERSIONS_FILE '*.zookeeper' -j | tr '[],' '() ')"
+    val=$(sed -e 's/^"//' -e 's/"$//' <<<"$val")
+    IFS=$'\n' zk_versions=($val)
 }
 
 function get_kafka_checksums {
-    eval checksums="$(yq read $VERSIONS_FILE '*.checksum' -j | tr '[],' '() ')"
+    local val="$(yq read $VERSIONS_FILE '*.checksum' -j | tr '[],' '() ')"
+    val=$(sed -e 's/^"//' -e 's/"$//' <<<"$val")
+    IFS=$'\n' checksums=($val)
 }
 
 function get_kafka_third_party_libs {
-    eval libs="$(yq read "$VERSIONS_FILE" '*.third-party-libs' -j | tr '[],' '() ')"
+    local val="$(yq read "$VERSIONS_FILE" '*.third-party-libs' -j | tr '[],' '() ')"
+    val=$(sed -e 's/^"//' -e 's/"$//' <<<"$val")
+    IFS=$'\n' libs=($val)
 }
 
 function get_kafka_protocols {
-    eval protocols="$(yq read $VERSIONS_FILE '*.protocol' -j | tr '[],' '() ')"
+    local val="$(yq read $VERSIONS_FILE '*.protocol' -j | tr '[],' '() ')"
+    val=$(sed -e 's/^"//' -e 's/"$//' <<<"$val")
+    IFS=$'\n' protocols=($val)
 }
 
 function get_kafka_formats {
-    eval formats="$(yq read $VERSIONS_FILE '*.format' -j | tr '[],' '() ')"
+    local val="$(yq read $VERSIONS_FILE '*.format' -j | tr '[],' '() ')"
+    val=$(sed -e 's/^"//' -e 's/"$//' <<<"$val")
+    IFS=$'\n' formats=($val)
 }
 
 function get_kafka_does_not_support {
-    eval does_not_support="$(yq read $VERSIONS_FILE '*.unsupported-features' -j | tr '[],' '() ')"
+    local val="$(yq read $VERSIONS_FILE '*.unsupported-features' -j | tr '[],' '() ')"
+    val=$(sed -e 's/^"//' -e 's/"$//' <<<"$val")
+    IFS=$'\n' does_not_support=($val)
 
     get_kafka_versions
 
     declare -Ag version_does_not_support
     for i in "${!versions[@]}"
-    do 
+    do
+        echo "does_not_support: ${versions[$i]} = ${does_not_support[$i]}"
         version_does_not_support[${versions[$i]}]=${does_not_support[$i]}
     done
 }

@@ -6,9 +6,9 @@ source $(dirname $(realpath $0))/../multi-platform-support.sh
 
 # Image directories
 base_images="base"
-java_images="operator jmxtrans"
+read -r -a java_images <<< "operator jmxtrans"
 kafka_image="kafka"
-kafka_images="kafka test-client"
+read -r -a kafka_images <<< "kafka test-client"
 
 function dependency_check { 
 

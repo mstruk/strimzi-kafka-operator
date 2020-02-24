@@ -21,5 +21,6 @@ then
     done
 else
     # Clean up the last version in the file?
+echo Versions: "${versions[@]}" "(" ${versions[1]} ")"
     mvn ${MVN_ARGS} clean "-Dkafka-metadata-version=${versions[-1]}"
 fi
