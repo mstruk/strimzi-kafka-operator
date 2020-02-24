@@ -64,7 +64,7 @@ public interface KubeCluster {
             }
         }
         if (clusters == null) {
-            clusters = new KubeCluster[]{new OpenShift(), new Minikube(), new Minishift()};
+            clusters = new KubeCluster[]{new OpenShift(), new Minikube(), new Minishift(), new Kind()};
         }
         KubeCluster cluster = null;
         for (KubeCluster kc : clusters) {
