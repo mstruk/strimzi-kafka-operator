@@ -119,7 +119,7 @@ public class Session extends AbstractVerticle {
                             healthServer.close();
                         }
                     } catch (TimeoutException e) {
-                        LOGGER.warn("Timeout while closing AdminClient with timeout {}ms", e, timeoutMs);
+                        LOGGER.warn("Timeout while closing AdminClient with timeout {}ms", timeoutMs, e);
                     } finally {
                         LOGGER.info("Stopped");
                         blockingResult.complete();
@@ -140,7 +140,7 @@ public class Session extends AbstractVerticle {
         Security.setProperty("networkaddress.cache.ttl", dnsCacheTtl);
         adminClientProps.setProperty(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, config.get(Config.KAFKA_BOOTSTRAP_SERVERS));
 
-        if (Boolean.valueOf(config.get(Config.TLS_ENABLED))) {
+        if (Boolean.parseBoolean(config.get(Config.TLS_ENABLED))) {
             adminClientProps.setProperty(AdminClientConfig.SECURITY_PROTOCOL_CONFIG, "SSL");
             adminClientProps.setProperty(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, config.get(Config.TLS_TRUSTSTORE_LOCATION));
             adminClientProps.setProperty(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, config.get(Config.TLS_TRUSTSTORE_PASSWORD));

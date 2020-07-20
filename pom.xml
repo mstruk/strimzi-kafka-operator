@@ -112,6 +112,9 @@
         <opentracing.version>0.33.0</opentracing.version>
         <opentracing-kafka.version>0.1.4</opentracing-kafka.version>
         <strimzi-oauth.version>0.6.0</strimzi-oauth.version>
+        <registry.version>1.2.3.Final</registry.version>
+        <kafka.streams.version>2.5.0</kafka.streams.version>
+        <grpc.version>1.30.2</grpc.version>
 
         <test-containers.version>1.14.0</test-containers.version>
         <javax.json-api.version>1.1.4</javax.json-api.version>
@@ -542,6 +545,21 @@
                 <groupId>org.quartz-scheduler</groupId>
                 <artifactId>quartz</artifactId>
                 <version>${quartz.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.apicurio</groupId>
+                <artifactId>apicurio-registry-storage-streams</artifactId>
+                <version>${registry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>kafka-streams</artifactId>
+                <version>${kafka.streams.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-api</artifactId>
+                <version>${grpc.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.debezium</groupId>

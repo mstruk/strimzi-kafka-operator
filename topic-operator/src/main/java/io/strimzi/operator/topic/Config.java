@@ -108,6 +108,12 @@ public class Config {
     public static final String TC_TLS_KEYSTORE_PASSWORD = "STRIMZI_KEYSTORE_PASSWORD";
     public static final String TC_TLS_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM = "STRIMZI_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM";
 
+    public static final String TC_STORE_TOPIC = "STRIMZI_STORE_TOPIC";
+    public static final String TC_STORE_NAME = "STRIMZI_STORE_NAME";
+    public static final String TC_APPLICATION_ID = "STRIMZI_APPLICATION_ID";
+    public static final String TC_APPLICATION_SERVER = "STRIMZI_APPLICATION_SERVER";
+    public static final String TC_STALE_RESULT_TIMEOUT = "STRIMZI_STALE_RESULT_TIMEOUT";
+
     private static final Map<String, Value<?>> CONFIG_VALUES = new HashMap<>();
 
     /** A comma-separated list of key=value pairs for selecting Resources that describe topics. */
@@ -159,6 +165,17 @@ public class Config {
     /** The endpoint identification algorithm used by clients to validate server host name. The default value is https. Clients including client connections created by the broker for inter-broker communication verify that the broker host name matches the host name in the broker’s certificate. Disable server host name verification by setting to an empty string.**/
     public static final Value<String> TLS_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM = new Value<>(TC_TLS_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM, STRING, "HTTPS");
 
+    /** The store topic for the kafka Streams based TopicStore */
+    public static final Value<String> STORE_TOPIC = new Value<>(TC_STORE_TOPIC, STRING, "store-topic");
+    /** The store name for the kafka Streams based TopicStore */
+    public static final Value<String> STORE_NAME = new Value<>(TC_STORE_NAME, STRING, "topic-store");
+    /** The application id for the kafka Streams based TopicStore */
+    public static final Value<String> APPLICATION_ID = new Value<>(TC_APPLICATION_ID, STRING, "strimzi-topic-store");
+    /** The (gRPC) application server for the kafka Streams based TopicStore */
+    public static final Value<String> APPLICATION_SERVER = new Value<>(TC_APPLICATION_SERVER, STRING, "localhost:9000");
+    /** The stale timeout for the kafka Streams based TopicStore */
+    public static final Value<Long> STALE_RESULT_TIMEOUT = new Value<>(TC_STALE_RESULT_TIMEOUT, DURATION, "1000");
+
     static {
         Map<String, Value<?>> configValues = CONFIG_VALUES;
         addConfigValue(configValues, LABELS);
@@ -178,6 +195,11 @@ public class Config {
         addConfigValue(configValues, TLS_KEYSTORE_LOCATION);
         addConfigValue(configValues, TLS_KEYSTORE_PASSWORD);
         addConfigValue(configValues, TLS_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM);
+        addConfigValue(configValues, STORE_TOPIC);
+        addConfigValue(configValues, STORE_NAME);
+        addConfigValue(configValues, APPLICATION_ID);
+        addConfigValue(configValues, APPLICATION_SERVER);
+        addConfigValue(configValues, STALE_RESULT_TIMEOUT);
     }
 
     static void addConfigValue(Map<String, Value<?>> configValues, Value<?> cv) {

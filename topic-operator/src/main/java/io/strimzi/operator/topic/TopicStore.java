@@ -20,6 +20,10 @@ interface TopicStore {
 
     }
 
+    public static class InvalidStateException extends Exception {
+
+    }
+
     /**
      * Asynchronously get the topic with the given name
      * completing the returned future when done.
