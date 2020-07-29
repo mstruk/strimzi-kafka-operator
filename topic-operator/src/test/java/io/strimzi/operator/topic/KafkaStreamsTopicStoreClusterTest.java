@@ -8,7 +8,6 @@ import io.vertx.core.Promise;
 import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -69,10 +68,8 @@ public class KafkaStreamsTopicStoreClusterTest {
                 .build();
 
         failedCreateCompleted.future()
-                .compose(v -> {
-                    // update my_topic
-                    return store2.update(updatedTopic);
-                })
+                // update my_topic
+                .compose(v -> store2.update(updatedTopic))
                 .onComplete(context.succeeding())
 
                 // re-read it and assert equal
@@ -101,12 +98,6 @@ public class KafkaStreamsTopicStoreClusterTest {
                     assertThat(e, instanceOf(TopicStore.NoSuchEntityExistsException.class));
                     async.flag();
                 })));
-    }
-
-    @AfterEach
-    public void teardown(VertxTestContext context) {
-        Checkpoint async = context.checkpoint();
-        async.flag();
     }
 
 }

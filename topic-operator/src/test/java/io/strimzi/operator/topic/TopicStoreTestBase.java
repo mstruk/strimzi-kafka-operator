@@ -66,10 +66,8 @@ public abstract class TopicStoreTestBase {
                 .build();
 
         failedCreateCompleted.future()
-            .compose(v -> {
                 // update my_topic
-                return store.update(updatedTopic);
-            })
+                .compose(v -> store.update(updatedTopic))
             .onComplete(context.succeeding())
 
             // re-read it and assert equal
@@ -82,15 +80,15 @@ public abstract class TopicStoreTestBase {
                 assertThat(rereadTopic.getConfig(), is(updatedTopic.getConfig()));
             })))
 
-            // delete it
-            .compose(v -> store.delete(updatedTopic.getTopicName()))
-            .onComplete(context.succeeding())
+                // delete it
+                .compose(v -> store.delete(updatedTopic.getTopicName()))
+                .onComplete(context.succeeding())
 
-            // assert we can't read it again
-            .compose(v -> store.read(new TopicName(topicName)))
-            .onComplete(context.succeeding(deletedTopic -> context.verify(() -> {
-                assertThat(deletedTopic, is(nullValue()));
-            })))
+                // assert we can't read it again
+                .compose(v -> store.read(new TopicName(topicName)))
+                .onComplete(context.succeeding(deletedTopic -> context.verify(() ->
+                        assertThat(deletedTopic, is(nullValue()))))
+                )
 
             // delete it again: assert an error
             .compose(v -> store.delete(updatedTopic.getTopicName()))

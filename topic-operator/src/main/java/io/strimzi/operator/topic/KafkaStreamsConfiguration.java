@@ -31,7 +31,6 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.errors.InvalidStateStoreException;
 import org.apache.kafka.streams.state.HostInfo;
-import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,14 +43,14 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * Configure all things needed for KafkaStreamsTopicStore
+ * Configuration required for KafkaStreamsTopicStore
  */
 public class KafkaStreamsConfiguration {
     private static final Logger log = LoggerFactory.getLogger(KafkaStreamsConfiguration.class);
 
-    private final List<Object> closeables = new ArrayList<>();
+    private final List<AutoCloseable> closeables = new ArrayList<>();
 
-    KafkaStreams streams; // exposed for test purposes
+    /* test */ KafkaStreams streams;
     private TopicStore topicStore;
 
     public void start(Config config, Properties kafkaProperties) {
@@ -77,7 +76,7 @@ public class KafkaStreamsConfiguration {
 
             FilterPredicate<String, Topic> filter = (s, s1, s2, topic) -> true;
 
-            ReadOnlyKeyValueStore<String, Topic> store = new DistributedReadOnlyKeyValueStore<>(
+            DistributedReadOnlyKeyValueStore<String, Topic> store = new DistributedReadOnlyKeyValueStore<>(
                     streams,
                     hostInfo,
                     storeName,
@@ -113,7 +112,6 @@ public class KafkaStreamsConfiguration {
             closeables.add(serverCloseable);
 
             topicStore = new KafkaStreamsTopicStore(store, storeTopic, producer, service);
-            closeables.add(topicStore);
         } catch (Exception e) {
             stop(); // stop what we already started for any exception
             throw e;
@@ -207,13 +205,11 @@ public class KafkaStreamsConfiguration {
         return topicStore;
     }
 
-    private static void close(Object service) {
-        if (service instanceof AutoCloseable) {
-            try {
-                ((AutoCloseable) service).close();
-            } catch (Exception e) {
-                log.warn("Exception while closing service: {}", service, e);
-            }
+    private static void close(AutoCloseable service) {
+        try {
+            service.close();
+        } catch (Exception e) {
+            log.warn("Exception while closing service: {}", service, e);
         }
     }
 }

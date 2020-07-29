@@ -165,15 +165,17 @@ public class Config {
     /** The endpoint identification algorithm used by clients to validate server host name. The default value is https. Clients including client connections created by the broker for inter-broker communication verify that the broker host name matches the host name in the broker’s certificate. Disable server host name verification by setting to an empty string.**/
     public static final Value<String> TLS_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM = new Value<>(TC_TLS_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM, STRING, "HTTPS");
 
-    /** The store topic for the kafka Streams based TopicStore */
+    /**
+     * The store topic for the Kafka Streams based TopicStore
+     */
     public static final Value<String> STORE_TOPIC = new Value<>(TC_STORE_TOPIC, STRING, "store-topic");
-    /** The store name for the kafka Streams based TopicStore */
+    /** The store name for the Kafka Streams based TopicStore */
     public static final Value<String> STORE_NAME = new Value<>(TC_STORE_NAME, STRING, "topic-store");
-    /** The application id for the kafka Streams based TopicStore */
+    /** The application id for the Kafka Streams based TopicStore */
     public static final Value<String> APPLICATION_ID = new Value<>(TC_APPLICATION_ID, STRING, "strimzi-topic-store");
-    /** The (gRPC) application server for the kafka Streams based TopicStore */
+    /** The (gRPC) application server for the Kafka Streams based TopicStore */
     public static final Value<String> APPLICATION_SERVER = new Value<>(TC_APPLICATION_SERVER, STRING, "localhost:9000");
-    /** The stale timeout for the kafka Streams based TopicStore */
+    /** The stale timeout for the Kafka Streams based TopicStore */
     public static final Value<Long> STALE_RESULT_TIMEOUT = new Value<>(TC_STALE_RESULT_TIMEOUT, DURATION, "1000");
 
     static {

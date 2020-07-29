@@ -4,15 +4,12 @@
  */
 package io.strimzi.operator.topic;
 
-import io.vertx.junit5.Checkpoint;
-import io.vertx.junit5.VertxTestContext;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -110,12 +107,6 @@ public class KafkaStreamsTopicStoreTest extends TopicStoreTestBase {
         if (configuration != null) {
             this.store = configuration.getTopicStore();
         }
-    }
-
-    @AfterEach
-    public void teardown(VertxTestContext context) {
-        Checkpoint async = context.checkpoint();
-        async.flag();
     }
 
 }
