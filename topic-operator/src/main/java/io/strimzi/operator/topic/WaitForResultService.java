@@ -86,9 +86,9 @@ public class WaitForResultService implements AsyncBiFunctionService.WithSerdes<S
     }
 
     private static class ResultCF extends CompletableFuture<Integer> {
-        final long ts;
+        private final long ts;
 
-        public ResultCF() {
+        private ResultCF() {
             this.ts = System.currentTimeMillis();
         }
     }

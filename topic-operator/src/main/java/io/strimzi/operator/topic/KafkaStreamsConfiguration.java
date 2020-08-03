@@ -26,6 +26,13 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerInterceptors;
 import io.grpc.Status;
+import org.apache.kafka.clients.admin.Admin;
+import org.apache.kafka.clients.admin.DescribeClusterResult;
+import org.apache.kafka.clients.admin.DescribeConfigsResult;
+import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.clients.admin.TopicDescription;
+import org.apache.kafka.common.config.ConfigResource;
+import org.apache.kafka.common.config.TopicConfig;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.Topology;
@@ -41,10 +48,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * Configuration required for KafkaStreamsTopicStore
  */
+@SuppressWarnings("checkstyle:ClassDataAbstractionCoupling")
 public class KafkaStreamsConfiguration {
     private static final Logger log = LoggerFactory.getLogger(KafkaStreamsConfiguration.class);
 
@@ -58,7 +67,34 @@ public class KafkaStreamsConfiguration {
             String storeTopic = config.get(Config.STORE_TOPIC);
             String storeName = config.get(Config.STORE_NAME);
 
-            long timeoutMillis = config.get(Config.STALE_RESULT_TIMEOUT);
+            // check if entry topic has the right configuration
+            Admin admin = Admin.create(kafkaProperties);
+            DescribeClusterResult clusterResult = admin.describeCluster();
+            int clusterSize = clusterResult.nodes().get().size();
+            Set<String> topics = admin.listTopics().names().get();
+            if (topics.contains(storeTopic)) {
+                TopicDescription topicDescription = admin.describeTopics(Collections.singleton(storeTopic)).values().get(storeTopic).get();
+                int rf = topicDescription.partitions().get(0).replicas().size();
+                ConfigResource isrCR = new ConfigResource(ConfigResource.Type.TOPIC, TopicConfig.MIN_IN_SYNC_REPLICAS_CONFIG);
+                DescribeConfigsResult configsResult = admin.describeConfigs(Collections.singleton(isrCR));
+                int minISR = 0;
+                try {
+                    minISR = Integer.parseInt(configsResult.values().get(isrCR).get().get(TopicConfig.MIN_IN_SYNC_REPLICAS_CONFIG).value());
+                } catch (Exception ignored) {
+                }
+                if (rf != Math.min(3, clusterSize) || minISR != rf - 1) {
+                    log.warn("Durability of the topic is not sufficient for production use - replicationFactor: {}, {}: {}",
+                            rf, TopicConfig.MIN_IN_SYNC_REPLICAS_CONFIG, minISR);
+                }
+            } else {
+                int rf = Math.min(3, clusterSize);
+                int minISR = rf - 1;
+                NewTopic newTopic = new NewTopic(storeTopic, 1, (short) rf)
+                        .configs(Collections.singletonMap(TopicConfig.MIN_IN_SYNC_REPLICAS_CONFIG, String.valueOf(minISR)));
+                admin.createTopics(Collections.singleton(newTopic)).all().get();
+            }
+
+            long timeoutMillis = config.get(Config.STALE_RESULT_TIMEOUT_MS);
             ForeachActionDispatcher<String, Integer> dispatcher = new ForeachActionDispatcher<>();
             WaitForResultService serviceImpl = new WaitForResultService(timeoutMillis, dispatcher);
             closeables.add(serviceImpl);
@@ -114,7 +150,7 @@ public class KafkaStreamsConfiguration {
             topicStore = new KafkaStreamsTopicStore(store, storeTopic, producer, service);
         } catch (Exception e) {
             stop(); // stop what we already started for any exception
-            throw e;
+            throw new IllegalStateException(e);
         }
     }
 

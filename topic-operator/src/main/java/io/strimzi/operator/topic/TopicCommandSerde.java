@@ -4,13 +4,10 @@
  */
 package io.strimzi.operator.topic;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.apicurio.registry.utils.kafka.SelfSerde;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.UncheckedIOException;
 
 /**
@@ -18,50 +15,46 @@ import java.io.UncheckedIOException;
  */
 public class TopicCommandSerde extends SelfSerde<TopicCommand> {
 
+    private static final String UUID = "uuid";
+    private static final String TYPE = "type";
+    private static final String TOPIC = "topic";
+    private static final String KEY = "key";
+
     @Override
     public byte[] serialize(String topic, TopicCommand data) {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
-                oos.writeUTF(data.getUuid());
-                TopicCommand.Type type = data.getType();
-                oos.writeInt(type.ordinal());
-                if (type == TopicCommand.Type.CREATE || type == TopicCommand.Type.UPDATE) {
-                    byte[] json = TopicSerialization.toJson(data.getTopic());
-                    oos.writeInt(json.length);
-                    oos.write(json);
-                } else {
-                    oos.writeUTF(data.getKey());
-                }
+        return TopicSerialization.toBytes((mapper, root) -> {
+            root.put(UUID, data.getUuid());
+            TopicCommand.Type type = data.getType();
+            root.put(TYPE, type.ordinal());
+            if (type == TopicCommand.Type.CREATE || type == TopicCommand.Type.UPDATE) {
+                byte[] json = TopicSerialization.toJson(data.getTopic());
+                root.put(TOPIC, json);
+            } else {
+                root.put(KEY, data.getKey());
             }
-            return baos.toByteArray();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        });
     }
 
     @Override
     public TopicCommand deserialize(String t, byte[] data) {
-        try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(data);
-            try (ObjectInputStream ois = new ObjectInputStream(bais)) {
-                String uuid = ois.readUTF();
-                int ordinal = ois.readInt();
+        return TopicSerialization.fromJson(data, (mapper, bytes) -> {
+            try {
+                JsonNode root = mapper.readTree(bytes);
+                String uuid = root.get(UUID).asText();
+                int ordinal = root.get(TYPE).asInt();
                 TopicCommand.Type type = TopicCommand.Type.values()[ordinal];
                 Topic topic = null;
                 TopicName name = null;
                 if (type == TopicCommand.Type.CREATE || type == TopicCommand.Type.UPDATE) {
-                    int length = ois.readInt();
-                    byte[] json = new byte[length];
-                    ois.read(json, 0, length);
+                    byte[] json = root.get(TOPIC).binaryValue();
                     topic = TopicSerialization.fromJson(json);
                 } else {
-                    name = new TopicName(ois.readUTF());
+                    name = new TopicName(root.get(KEY).asText());
                 }
                 return new TopicCommand(uuid, type, topic, name);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
             }
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        });
     }
 }

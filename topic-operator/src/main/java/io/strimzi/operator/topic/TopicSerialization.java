@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 import static java.lang.String.format;
 
@@ -237,19 +239,51 @@ class TopicSerialization {
      * This is what is stored in the znodes owned by the {@link ZkTopicStore}.
      */
     public static byte[] toJson(Topic topic) {
+        return toBytes((mapper, root) -> {
+            // TODO Do we store the k8s uid here?
+            root.put(JSON_KEY_MAP_NAME, topic.getOrAsKubeName().toString());
+            root.put(JSON_KEY_TOPIC_NAME, topic.getTopicName().toString());
+            root.put(JSON_KEY_PARTITIONS, topic.getNumPartitions());
+            root.put(JSON_KEY_REPLICAS, topic.getNumReplicas());
+
+            ObjectNode config = mapper.createObjectNode();
+            for (Map.Entry<String, String> entry : topic.getConfig().entrySet()) {
+                config.put(entry.getKey(), entry.getValue());
+            }
+            root.set(JSON_KEY_CONFIG, config);
+        });
+    }
+
+    /**
+     * Returns the Topic represented by the given UTF-8 encoded JSON.
+     * This is what is stored in the znodes owned by the {@link ZkTopicStore}.
+     */
+    @SuppressWarnings("unchecked")
+    public static Topic fromJson(byte[] json) {
+        return fromJson(json, (mapper, bytes) -> {
+            Map<String, Object> root;
+            try {
+                root = mapper.readValue(json, Map.class);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            Topic.Builder builder = new Topic.Builder();
+            builder.withTopicName((String) root.get(JSON_KEY_TOPIC_NAME))
+                    .withMapName((String) root.get(JSON_KEY_MAP_NAME))
+                    .withNumPartitions((Integer) root.get(JSON_KEY_PARTITIONS))
+                    .withNumReplicas(((Integer) root.get(JSON_KEY_REPLICAS)).shortValue());
+            Map<String, String> config = (Map) root.get(JSON_KEY_CONFIG);
+            for (Map.Entry<String, String> entry : config.entrySet()) {
+                builder.withConfigEntry(entry.getKey(), entry.getValue());
+            }
+            return builder.build();
+        });
+    }
+
+    static byte[] toBytes(BiConsumer<ObjectMapper, ObjectNode> consumer) {
         ObjectMapper mapper = objectMapper();
         ObjectNode root = mapper.createObjectNode();
-        // TODO Do we store the k8s uid here?
-        root.put(JSON_KEY_MAP_NAME, topic.getOrAsKubeName().toString());
-        root.put(JSON_KEY_TOPIC_NAME, topic.getTopicName().toString());
-        root.put(JSON_KEY_PARTITIONS, topic.getNumPartitions());
-        root.put(JSON_KEY_REPLICAS, topic.getNumReplicas());
-
-        ObjectNode config = mapper.createObjectNode();
-        for (Map.Entry<String, String> entry : topic.getConfig().entrySet()) {
-            config.put(entry.getKey(), entry.getValue());
-        }
-        root.set(JSON_KEY_CONFIG, config);
+        consumer.accept(mapper, root);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             mapper.writeValue(baos, root);
@@ -259,29 +293,9 @@ class TopicSerialization {
         return baos.toByteArray();
     }
 
-    /**
-     * Returns the Topic represented by the given UTF-8 encoded JSON.
-     * This is what is stored in the znodes owned by the {@link ZkTopicStore}.
-     */
-    @SuppressWarnings("unchecked")
-    public static Topic fromJson(byte[] json) {
+    static <T> T fromJson(byte[] json, BiFunction<ObjectMapper, byte[], T> fn) {
         ObjectMapper mapper = objectMapper();
-        Map<String, Object> root = null;
-        try {
-            root = mapper.readValue(json, Map.class);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        Topic.Builder builder = new Topic.Builder();
-        builder.withTopicName((String) root.get(JSON_KEY_TOPIC_NAME))
-                .withMapName((String) root.get(JSON_KEY_MAP_NAME))
-                .withNumPartitions((Integer) root.get(JSON_KEY_PARTITIONS))
-                .withNumReplicas(((Integer) root.get(JSON_KEY_REPLICAS)).shortValue());
-        Map<String, String> config = (Map) root.get(JSON_KEY_CONFIG);
-        for (Map.Entry<String, String> entry : config.entrySet()) {
-            builder.withConfigEntry(entry.getKey(), entry.getValue());
-        }
-        return builder.build();
+        return fn.apply(mapper, json);
     }
 
     private static ObjectMapper objectMapper() {

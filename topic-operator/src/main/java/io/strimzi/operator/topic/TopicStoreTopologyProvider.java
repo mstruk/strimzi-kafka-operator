@@ -54,7 +54,7 @@ public class TopicStoreTopologyProvider implements Supplier<Topology> {
         configuration.put(TopicConfig.SEGMENT_BYTES_CONFIG, String.valueOf(64 * 1024 * 1024));
 
         // Input topic command -- store topic
-        // Key is topic name -- which is also used for KeyValue store key
+        // Key is Kafka topic name -- which is also used for KeyValue store key
         KStream<String, TopicCommand> topicRequest = builder.stream(
                 storeTopic,
                 Consumed.with(Serdes.String(), new TopicCommandSerde())
@@ -80,6 +80,12 @@ public class TopicStoreTopologyProvider implements Supplier<Topology> {
         return builder.build(kafkaProperties);
     }
 
+    /**
+     * This processor applies topic command to key-value store.
+     * It then updates dispatcher with store modification result.
+     * In the case of invalid store update result is not-null.
+     * Dispatcher applies the result to a waiting callback CompletionStage.
+     */
     private static class TopicCommandTransformer implements Processor<String, TopicCommand> {
         private final String topicStoreName;
         private final ForeachAction<? super String, ? super Integer> dispatcher;
