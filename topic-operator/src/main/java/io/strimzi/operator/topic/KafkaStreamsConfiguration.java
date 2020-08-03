@@ -50,6 +50,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import static java.lang.Integer.parseInt;
+
 /**
  * Configuration required for KafkaStreamsTopicStore
  */
@@ -75,13 +77,9 @@ public class KafkaStreamsConfiguration {
             if (topics.contains(storeTopic)) {
                 TopicDescription topicDescription = admin.describeTopics(Collections.singleton(storeTopic)).values().get(storeTopic).get();
                 int rf = topicDescription.partitions().get(0).replicas().size();
-                ConfigResource isrCR = new ConfigResource(ConfigResource.Type.TOPIC, TopicConfig.MIN_IN_SYNC_REPLICAS_CONFIG);
-                DescribeConfigsResult configsResult = admin.describeConfigs(Collections.singleton(isrCR));
-                int minISR = 0;
-                try {
-                    minISR = Integer.parseInt(configsResult.values().get(isrCR).get().get(TopicConfig.MIN_IN_SYNC_REPLICAS_CONFIG).value());
-                } catch (Exception ignored) {
-                }
+                ConfigResource storeTopicConfigResource = new ConfigResource(ConfigResource.Type.TOPIC, storeTopic);
+                DescribeConfigsResult configsResult = admin.describeConfigs(Collections.singleton(storeTopicConfigResource));
+                int minISR = parseInt(configsResult.values().get(storeTopicConfigResource).get().get(TopicConfig.MIN_IN_SYNC_REPLICAS_CONFIG).value());
                 if (rf != Math.min(3, clusterSize) || minISR != rf - 1) {
                     log.warn("Durability of the topic is not sufficient for production use - replicationFactor: {}, {}: {}",
                             rf, TopicConfig.MIN_IN_SYNC_REPLICAS_CONFIG, minISR);
@@ -108,7 +106,7 @@ public class KafkaStreamsConfiguration {
             String appServer = config.get(Config.APPLICATION_SERVER);
             String[] hostPort = appServer.split(":");
             log.info("Application server gRPC: '{}'", appServer);
-            HostInfo hostInfo = new HostInfo(hostPort[0], Integer.parseInt(hostPort[1]));
+            HostInfo hostInfo = new HostInfo(hostPort[0], parseInt(hostPort[1]));
 
             FilterPredicate<String, Topic> filter = (s, s1, s2, topic) -> true;
 
