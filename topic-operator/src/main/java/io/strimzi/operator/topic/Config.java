@@ -46,6 +46,14 @@ public class Config {
         }
     };
 
+    /** A Java Boolean */
+    private static final Type<? extends Boolean> BOOLEAN = new Type<Boolean>() {
+        @Override
+        Boolean parse(String s) {
+            return Boolean.parseBoolean(s);
+        }
+    };
+
     /**
      * A time duration.
      */
@@ -113,6 +121,7 @@ public class Config {
     public static final String TC_APPLICATION_ID = "STRIMZI_APPLICATION_ID";
     public static final String TC_APPLICATION_SERVER = "STRIMZI_APPLICATION_SERVER";
     public static final String TC_STALE_RESULT_TIMEOUT_MS = "STRIMZI_STALE_RESULT_TIMEOUT_MS";
+    public static final String TC_DISTRIBUTED_STORE = "STRIMZI_DISTRIBUTED_STORE";
 
     private static final Map<String, Value<?>> CONFIG_VALUES = new HashMap<>();
 
@@ -177,6 +186,8 @@ public class Config {
     public static final Value<String> APPLICATION_SERVER = new Value<>(TC_APPLICATION_SERVER, STRING, "localhost:9000");
     /** The stale timeout for the Kafka Streams based TopicStore */
     public static final Value<Long> STALE_RESULT_TIMEOUT_MS = new Value<>(TC_STALE_RESULT_TIMEOUT_MS, DURATION, "1000");
+    /** Is distributed KeyValue store used for the Kafka Streams based TopicStore */
+    public static final Value<Boolean> DISTRIBUTED_STORE = new Value<>(TC_DISTRIBUTED_STORE, BOOLEAN, "false");
 
     static {
         Map<String, Value<?>> configValues = CONFIG_VALUES;
@@ -202,6 +213,7 @@ public class Config {
         addConfigValue(configValues, APPLICATION_ID);
         addConfigValue(configValues, APPLICATION_SERVER);
         addConfigValue(configValues, STALE_RESULT_TIMEOUT_MS);
+        addConfigValue(configValues, DISTRIBUTED_STORE);
     }
 
     static void addConfigValue(Map<String, Value<?>> configValues, Value<?> cv) {

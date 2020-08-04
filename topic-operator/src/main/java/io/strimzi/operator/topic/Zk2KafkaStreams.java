@@ -18,24 +18,23 @@ public class Zk2KafkaStreams {
         // TODO
     }
 
-    public static void move(Zk zk, Config config, Properties kafkaProperties) {
+    public static void move(Zk zk, Config config, Properties kafkaProperties) throws Exception {
         String topicsPath = config.get(Config.TOPICS_PATH);
         TopicStore zkTopicStore = new ZkTopicStore(zk, topicsPath);
 
         KafkaStreamsConfiguration configuration = new KafkaStreamsConfiguration();
-        try {
-            configuration.start(config, kafkaProperties);
-            TopicStore ksTopicStore = configuration.getTopicStore();
-
-            zk.children(topicsPath, result -> result.map(list -> {
-                list.forEach(topicName -> {
-                    Future<Topic> ft = zkTopicStore.read(new TopicName(topicName));
-                    ft.onSuccess(ksTopicStore::create);
-                });
-                return null;
-            }));
-        } finally {
-            configuration.stop();
-        }
+        configuration.start(config, kafkaProperties)
+                .whenComplete((ksTopicStore, t) -> {
+                    if (t == null) {
+                        zk.children(topicsPath, result -> result.map(list -> {
+                            list.forEach(topicName -> {
+                                Future<Topic> ft = zkTopicStore.read(new TopicName(topicName));
+                                ft.onSuccess(ksTopicStore::create);
+                            });
+                            return null;
+                        }));
+                    }
+                })
+                .whenComplete((s, t) -> configuration.stop());
     }
 }

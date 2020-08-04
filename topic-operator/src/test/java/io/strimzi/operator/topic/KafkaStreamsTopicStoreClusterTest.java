@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -27,11 +29,14 @@ public class KafkaStreamsTopicStoreClusterTest {
     public void testCluster(VertxTestContext context) throws Exception {
         Assumptions.assumeTrue(KafkaStreamsTopicStoreTest.isKafkaAvailable());
 
-        KafkaStreamsConfiguration ksc1 = KafkaStreamsTopicStoreTest.configuration(Collections.emptyMap());
-        KafkaStreamsConfiguration ksc2 = KafkaStreamsTopicStoreTest.configuration(Collections.singletonMap(Config.APPLICATION_SERVER.key, "localhost:9001"));
+        Map<String, String> config = new HashMap<>();
+        config.put(Config.DISTRIBUTED_STORE.key, "true");
+        KafkaStreamsConfiguration ksc1 = KafkaStreamsTopicStoreTest.configuration(config);
+        config.put(Config.APPLICATION_SERVER.key, "localhost:9001");
+        KafkaStreamsConfiguration ksc2 = KafkaStreamsTopicStoreTest.configuration(config);
 
-        TopicStore store1 = ksc1.getTopicStore();
-        TopicStore store2 = ksc2.getTopicStore();
+        TopicStore store1 = ksc1.store;
+        TopicStore store2 = ksc2.store;
 
         Checkpoint async = context.checkpoint();
 

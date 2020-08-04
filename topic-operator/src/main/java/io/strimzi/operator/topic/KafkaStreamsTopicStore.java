@@ -4,13 +4,13 @@
  */
 package io.strimzi.operator.topic;
 
-import io.apicurio.registry.streams.diservice.AsyncBiFunctionService;
 import io.apicurio.registry.utils.kafka.ProducerActions;
 import io.vertx.core.Future;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 
 import java.util.concurrent.CompletionStage;
+import java.util.function.BiFunction;
 
 /**
  * TopicStore based on Kafka Streams and
@@ -23,13 +23,13 @@ public class KafkaStreamsTopicStore implements TopicStore {
     private final String storeTopic;
     private final ProducerActions<String, TopicCommand> producer;
 
-    private final AsyncBiFunctionService<String, String, Integer> resultService;
+    private final BiFunction<String, String, CompletionStage<Integer>> resultService;
 
     public KafkaStreamsTopicStore(
             ReadOnlyKeyValueStore<String, Topic> topicStore,
             String storeTopic,
             ProducerActions<String, TopicCommand> producer,
-            AsyncBiFunctionService<String, String, Integer> resultService) {
+            BiFunction<String, String, CompletionStage<Integer>> resultService) {
         this.topicStore = topicStore;
         this.storeTopic = storeTopic;
         this.producer = producer;

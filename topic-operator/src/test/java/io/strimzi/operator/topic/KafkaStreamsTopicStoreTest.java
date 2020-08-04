@@ -74,7 +74,7 @@ public class KafkaStreamsTopicStoreTest extends TopicStoreTestBase {
         }
 
         KafkaStreamsConfiguration configuration = new KafkaStreamsConfiguration();
-        configuration.start(config, kafkaProperties);
+        configuration.start(config, kafkaProperties).toCompletableFuture().get();
 
         KafkaStreams ks = configuration.streams;
         int attempts = 50; // 5sec
@@ -105,7 +105,7 @@ public class KafkaStreamsTopicStoreTest extends TopicStoreTestBase {
     @BeforeEach
     public void setup() {
         if (configuration != null) {
-            this.store = configuration.getTopicStore();
+            this.store = configuration.store;
         }
     }
 
