@@ -31,6 +31,7 @@ import org.apache.kafka.clients.admin.DescribeClusterResult;
 import org.apache.kafka.clients.admin.DescribeConfigsResult;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.admin.TopicDescription;
+import org.apache.kafka.common.TopicPartitionInfo;
 import org.apache.kafka.common.config.ConfigResource;
 import org.apache.kafka.common.config.TopicConfig;
 import org.apache.kafka.common.serialization.Serdes;
@@ -76,7 +77,8 @@ public class KafkaStreamsConfiguration {
             Set<String> topics = admin.listTopics().names().get();
             if (topics.contains(storeTopic)) {
                 TopicDescription topicDescription = admin.describeTopics(Collections.singleton(storeTopic)).values().get(storeTopic).get();
-                int rf = topicDescription.partitions().get(0).replicas().size();
+                List<TopicPartitionInfo> partitions = topicDescription.partitions();
+                int rf = partitions.stream().map(tp -> tp.replicas().size()).min(Integer::compareTo).orElseThrow();
                 ConfigResource storeTopicConfigResource = new ConfigResource(ConfigResource.Type.TOPIC, storeTopic);
                 DescribeConfigsResult configsResult = admin.describeConfigs(Collections.singleton(storeTopicConfigResource));
                 int minISR = parseInt(configsResult.values().get(storeTopicConfigResource).get().get(TopicConfig.MIN_IN_SYNC_REPLICAS_CONFIG).value());
