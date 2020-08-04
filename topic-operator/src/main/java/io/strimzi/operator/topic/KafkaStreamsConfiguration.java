@@ -60,8 +60,9 @@ public class KafkaStreamsConfiguration {
                                     .thenApply(cr -> c2.setMinISR(parseInt(cr.get(TopicConfig.MIN_IN_SYNC_REPLICAS_CONFIG).value()))))
                             .thenApply(c3 -> {
                                 if (c3.rf != Math.min(3, c3.clusterSize) || c3.minISR != c3.rf - 1) {
-                                    log.warn("Durability of the topic is not sufficient for production use - replicationFactor: {}, {}: {}",
-                                        c3.rf, TopicConfig.MIN_IN_SYNC_REPLICAS_CONFIG, c3.minISR);
+                                    log.warn("Durability of the topic [{}] is not sufficient for production use - replicationFactor: {}, {}: {}. " +
+                                            "Replication factor should be at least 3 and {} one less.",
+                                            storeTopic, c3.rf, TopicConfig.MIN_IN_SYNC_REPLICAS_CONFIG, c3.minISR, TopicConfig.MIN_IN_SYNC_REPLICAS_CONFIG);
                                 }
                                 return null;
                             });

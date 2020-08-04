@@ -19,7 +19,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.BiFunction;
 
 /**
- * Simple local / in-memory store configuration.
+ * Simple local / in-memory store configuration which is sufficient when the TO runs in a single pod
  */
 class LocalStoreConfiguration implements StoreConfiguration {
     private ReadOnlyKeyValueStore<String, Topic> store;
