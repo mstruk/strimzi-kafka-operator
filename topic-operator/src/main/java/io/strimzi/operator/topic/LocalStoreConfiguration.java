@@ -11,6 +11,7 @@ import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.List;
@@ -60,7 +61,11 @@ class LocalStoreConfiguration implements StoreConfiguration {
                                 }
                             }
                         }
-                        return method.invoke(store, args);
+                        try {
+                            return method.invoke(store, args);
+                        } catch (InvocationTargetException e) {
+                            throw e.getCause();
+                        }
                     }
                 }
         );
