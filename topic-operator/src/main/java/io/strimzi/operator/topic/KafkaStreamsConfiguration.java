@@ -4,10 +4,10 @@
  */
 package io.strimzi.operator.topic;
 
-import io.apicurio.registry.streams.utils.ForeachActionDispatcher;
-import io.apicurio.registry.streams.utils.LoggingStateRestoreListener;
 import io.apicurio.registry.utils.kafka.AsyncProducer;
 import io.apicurio.registry.utils.kafka.ProducerActions;
+import io.apicurio.registry.utils.streams.ext.ForeachActionDispatcher;
+import io.apicurio.registry.utils.streams.ext.LoggingStateRestoreListener;
 import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.KafkaFuture;

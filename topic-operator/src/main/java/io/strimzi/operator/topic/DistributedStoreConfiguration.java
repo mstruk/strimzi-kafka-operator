@@ -4,22 +4,22 @@
  */
 package io.strimzi.operator.topic;
 
-import io.apicurio.registry.streams.diservice.AsyncBiFunctionService;
-import io.apicurio.registry.streams.diservice.AsyncBiFunctionServiceGrpcLocalDispatcher;
-import io.apicurio.registry.streams.diservice.DefaultGrpcChannelProvider;
-import io.apicurio.registry.streams.diservice.DistributedAsyncBiFunctionService;
-import io.apicurio.registry.streams.diservice.LocalService;
-import io.apicurio.registry.streams.diservice.proto.AsyncBiFunctionServiceGrpc;
-import io.apicurio.registry.streams.distore.DistributedReadOnlyKeyValueStore;
-import io.apicurio.registry.streams.distore.FilterPredicate;
-import io.apicurio.registry.streams.distore.KeyValueSerde;
-import io.apicurio.registry.streams.distore.KeyValueStoreGrpcImplLocalDispatcher;
-import io.apicurio.registry.streams.distore.UnknownStatusDescriptionInterceptor;
-import io.apicurio.registry.streams.distore.proto.KeyValueStoreGrpc;
-import io.apicurio.registry.streams.utils.Lifecycle;
 import io.apicurio.registry.utils.ConcurrentUtil;
 import io.apicurio.registry.utils.kafka.AsyncProducer;
 import io.apicurio.registry.utils.kafka.ProducerActions;
+import io.apicurio.registry.utils.streams.diservice.AsyncBiFunctionService;
+import io.apicurio.registry.utils.streams.diservice.AsyncBiFunctionServiceGrpcLocalDispatcher;
+import io.apicurio.registry.utils.streams.diservice.DefaultGrpcChannelProvider;
+import io.apicurio.registry.utils.streams.diservice.DistributedAsyncBiFunctionService;
+import io.apicurio.registry.utils.streams.diservice.LocalService;
+import io.apicurio.registry.utils.streams.diservice.proto.AsyncBiFunctionServiceGrpc;
+import io.apicurio.registry.utils.streams.distore.DistributedReadOnlyKeyValueStore;
+import io.apicurio.registry.utils.streams.distore.FilterPredicate;
+import io.apicurio.registry.utils.streams.distore.KeyValueSerde;
+import io.apicurio.registry.utils.streams.distore.KeyValueStoreGrpcImplLocalDispatcher;
+import io.apicurio.registry.utils.streams.distore.UnknownStatusDescriptionInterceptor;
+import io.apicurio.registry.utils.streams.distore.proto.KeyValueStoreGrpc;
+import io.apicurio.registry.utils.streams.ext.Lifecycle;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerInterceptors;

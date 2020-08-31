@@ -4,7 +4,7 @@
  */
 package io.strimzi.operator.topic;
 
-import io.apicurio.registry.streams.diservice.AsyncBiFunctionService;
+import io.apicurio.registry.utils.streams.diservice.AsyncBiFunctionService;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 

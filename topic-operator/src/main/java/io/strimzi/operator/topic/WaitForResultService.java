@@ -4,8 +4,8 @@
  */
 package io.strimzi.operator.topic;
 
-import io.apicurio.registry.streams.diservice.AsyncBiFunctionService;
-import io.apicurio.registry.streams.utils.ForeachActionDispatcher;
+import io.apicurio.registry.utils.streams.diservice.AsyncBiFunctionService;
+import io.apicurio.registry.utils.streams.ext.ForeachActionDispatcher;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 
