@@ -1,12 +1,12 @@
-# Topic store (new Kafka Streams based implementation) - design document
+# Topic store (a new, Kafka Streams based, implementation) - design document
 
 Topic store represents a persistent data store where the operator can store its copy of the 
-topic state that won't be modified by either K8S or Kafka.
-Currently we have ZooKeeper based working implementation, but with ZooKeeper being removed 
-as part of KIP-500, we decided to implement the store directly in/on Kafka, its Streams
+topic state that won't be modified by either Kubernetes or Kafka.
+Currently we have a working ZooKeeper based implementation, but with the ZooKeeper being removed 
+as part of KIP-500, we have decided to implement the store directly in/on Kafka - its Streams
 extension to be exact.
 
-TopicStore interface is a simple async CRUD API.
+The TopicStore interface represents a simple async CRUD API.
 
 ```
 interface TopicStore {
@@ -53,43 +53,43 @@ interface TopicStore {
 }
 ```
 
-The TopicStore is used from TopicOperator, which is used from web/Vert.x invocations
-and ZooKeeper watcher callbacks. The later - ZooKeeper watcher callbacks - also need
-to be replaced once KIP-500 is fully/properly implemented.
+The TopicStore is used from the TopicOperator, which is used from the Vert.x web request processing code
+and from the ZooKeeper watcher callbacks. These last also need
+to be replaced once KIP-500 is fully and properly implemented.
 
-At the moment there seems to be the need for only a single instance of TopicStore, which
-is important detail with regard to the new Kafka Streams based implementation.
+At the moment there seems to be a need for only a single instance of TopicStore, which
+is an important detail with regard to the new Kafka Streams based implementation.
 
 ### Kafka Streams based implementation
 
-In Kafka Streams you describe/configure your topics, processing, etc with so called [Topology](https://kafka.apache.org/25/javadoc/org/apache/kafka/streams/Topology.html).
-That way you describe the flow of your messages. In-between this processing you can make use
-of [Kafka Streams store](https://kafka.apache.org/20/documentation/streams/developer-guide/interactive-queries.html) 
-concept. This is a local in-memory store, which is backed by auto-generated topic (by Kafka Streams)
-so that data is properly persisted in case of any failures or shutdown.
+In Kafka Streams you describe and configure your topics, processing, etc using the so called [Topology](https://kafka.apache.org/25/javadoc/org/apache/kafka/streams/Topology.html).
+With it you describe the flow of your messages. As part of this processing you can make use
+of the [Kafka Streams store](https://kafka.apache.org/20/documentation/streams/developer-guide/interactive-queries.html) 
+. This is a local in-memory store, which is backed by the Kafka topic (created by the Kafka Streams)
+so that the data is properly persisted and can be reloaded if there is a failure or a shutdown.
 
-The "problem" with the store, as you can read, is that we only get local in-memory representation/implementation
-out-of-the-box, where data is actually distributed per key hashing, meaning that it's stored in exactly 
-one of the existing running instances of the in-memory store - depending which Kafka Streams topology consumer instance consumed the message.
+The "problem" with the store is that out-of-the-box we only get a local in-memory implementation
+, where the data is distributed using the 'key hashing', which means that it is stored in exactly 
+one of the running instances of this in-memory store - exactly which one it is depends on the Kafka Streams topology consumer instance that's consumimg the message.
 
-So what if our application, in our case TopicStore instance, is running in a cluster aka distributed?
-Then you need to provide your own distributed mechanism for the data lookup. Although the distributed implementation 
-is not available, there is a [Kafka Streams API](https://kafka.apache.org/25/javadoc/org/apache/kafka/streams/KafkaStreams.html) that provides you with the needed information to (easily) implement
-this distributed mechanism - e.g. you can get key's owner [HostInfo](https://kafka.apache.org/25/javadoc/org/apache/kafka/streams/state/HostInfo.html)
-or all available/running store's HostInfos.
+What if we want an application, that uses the TopicStore, and runs in a clustered setup - distributed?
+Then we need to provide our own distributed mechanism for the data lookup. Although the distributed implementation 
+is not available, there is a [Kafka Streams API](https://kafka.apache.org/25/javadoc/org/apache/kafka/streams/KafkaStreams.html) that provides us with the needed information to (easily) implement
+such a distributed mechanism - e.g. we can get the key owner's [HostInfo](https://kafka.apache.org/25/javadoc/org/apache/kafka/streams/state/HostInfo.html)
+or HostInfos of all the available running stores.
 
-In our case we went with [gRPC](https://grpc.io/) as the base for this distributed implementation. We needed to provide
-both the client and the server side. gRPC has [streaming API](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html) supported 
-via its [StreamObserver](https://grpc.github.io/grpc-java/javadoc/io/grpc/stub/StreamObserver.html) mechanism - which is what we used
-to implement [ReadOnlyKeyValueStore API](https://kafka.apache.org/25/javadoc/org/apache/kafka/streams/state/ReadOnlyKeyValueStore.html)
-iterating methods. The data exchanged between gRPC client and server is [Protobuf](https://developers.google.com/protocol-buffers) based.  
+We have built our distributed implementation on top of the [gRPC](https://grpc.io/). We needed to implement
+both the client and the server side. gRPC has a [streaming API](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html) implemented 
+by its [StreamObserver](https://grpc.github.io/grpc-java/javadoc/io/grpc/stub/StreamObserver.html) mechanism - which is what we used
+to implement the iterating methods of [ReadOnlyKeyValueStore API](https://kafka.apache.org/25/javadoc/org/apache/kafka/streams/state/ReadOnlyKeyValueStore.html)
+. The data exchanged between the gRPC client and the server is based on [Protobuf](https://developers.google.com/protocol-buffers).  
 
-The next problem we had to tackle is the async nature and no callback API in Kafka.
-In order to provide proper result (success or failure) for those TopicStore async CRUD methods,
-we implemented async gRPC based functions. Prior to pushing data into the above mentioned store
+The next problem we had to tackle was the async nature of Kafka and the lack of a callback API.
+In order to provide the proper result (success or failure) for those TopicStore async CRUD methods,
+we implemented the gRPC based async functions. Prior to pushing the data into the store
 (via producing a Kafka message), we issue a distributed function call, which registers a CompletableFuture
-on the right node (using same key hashing as next store update call) which is returned when the data is actually updated in the store.
-Data lookup is done directly on the distributed store impl, no distributed function call needed.
+on the right node (using the same key hashing as the next store update call) which is returned when the data is actually updated in the store.
+The data lookup is done directly on the distributed store implementation - no distributed function call is needed.
 
 If we don't need distribution / cluster, things get simplifed a lot - no gRPC needed, plain local in-memory store and async function.
 By default this simple single instance is expected. In order to use the distributed implementation,
