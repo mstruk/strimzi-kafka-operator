@@ -1,7 +1,7 @@
 Strimzi Development CLI image
 =============================
 
-Strimzi Development CLI image is a CentOS 7 based image that contains Java 8 and all the build dependencies and tools needed to build and deploy Strimzi.
+Strimzi Development CLI image is a Fedora based image that contains Java 17 and all the build dependencies and tools needed to build and deploy Strimzi.
 
 In order to build Strimzi Kafka Operator project you need a running Docker daemon.
 
@@ -59,7 +59,7 @@ kubectl get ns
 docker ps
 ```
 
-Also, if running a local Docker Registry as another docker container [as explained here](HACKING.md#local-build-pushing-to-the-docker-registry-used-by-kind), you'll want to make sure that you can push to it from your interactive container:
+Also, if running a local Docker Registry as another docker container [as explained here](DEV_GUIDE.md#local-build-pushing-to-the-docker-registry-used-by-kind), you'll want to make sure that you can push to it from your interactive container:
 
 ```
 # Set REGISTRY_IP to the same value you configured on Docker daemon
@@ -89,10 +89,10 @@ You then push the images to your Docker Registry, which depends on your environm
     DOCKER_REGISTRY=$DOCKER_REG DOCKER_ORG=strimzi make docker_push
 
 
-See [HACKING.md](HACKING.md#make-targets) for build targets, and other build instructions.
+See [DEV_GUIDE.md](DEV_GUIDE.md#make-targets) for build targets, and other build instructions.
 
 
 Deploying the operator and the cluster
 --------------------------------------
 
-See instructions in [HACKING.md](HACKING.md#building-strimzi) dependening on your environment.
+See instructions in [DEV_GUIDE.md](DEV_GUIDE.md#build-details) dependening on your environment.
