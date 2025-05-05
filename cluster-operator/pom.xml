@@ -153,6 +153,11 @@
             <groupId>io.strimzi</groupId>
             <artifactId>kafka-oauth-common</artifactId>
         </dependency>
+        <!-- Transitive override to address CVE-2024-57699. Remove in the future. -->
+        <dependency>
+            <groupId>net.minidev</groupId>
+            <artifactId>json-smart</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
@@ -334,6 +339,8 @@
                                 <ignoredUnusedDeclaredDependency>io.netty:netty-transport-native-epoll:jar</ignoredUnusedDeclaredDependency>
                                 <!-- Used by KafkaConnectApiIT -->
                                 <ignoredUnusedDeclaredDependency>org.apache.kafka:connect-file</ignoredUnusedDeclaredDependency>
+                                <!-- Added due to transitive override to address CVE-2024-57699. Remove in the future. -->
+                                <ignoredUnusedDeclaredDependency>net.minidev:json-smart</ignoredUnusedDeclaredDependency>
                             </ignoredUnusedDeclaredDependencies>
                             <ignoredNonTestScopedDependencies>
                                 <!-- Needed for builders used in the code -->
